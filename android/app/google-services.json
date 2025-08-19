@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "622702610562",
+    "project_id": "nefes-a9cfb",
+    "storage_bucket": "nefes-a9cfb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:622702610562:android:1a1276b2a8ea9735ca4c9b",
+        "android_client_info": {
+          "package_name": "com.example.flutter_application_1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAcmBRiSWReTSHXxvLKKZzrZZJFvC_LLPg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
