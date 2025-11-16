@@ -1,0 +1,68 @@
+name: flutter_application_1
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.9.0 <4.0.0' # Dart SDK sürümü güncellendi
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Firebase Paketleri (Güncel ve Uyumlu Versiyonlar)
+  firebase_core: ^2.24.2 # Bu satırı bu versiyona getir
+  firebase_auth: ^4.15.2  # Bu satırı bu versiyona getir
+  cloud_firestore: ^4.13.6
+  firebase_storage: ^11.5.6
+  google_sign_in: ^6.2.1
+
+  # Diğer Bağımlılıklar (Kontrol edip güncel tutabilirsin)
+  cupertino_icons: ^1.0.8
+  pdf: ^3.11.0
+  path_provider: ^2.1.3
+  permission_handler: ^11.3.1
+  printing: ^5.12.0
+  image_picker: ^1.1.2
+  flutter_local_notifications: ^17.1.2
+  flutter_dotenv: ^5.1.0
+  url_launcher: ^6.3.0
+  flutter_remix: ^0.0.3
+  fl_chart: ^0.68.0
+  http: ^1.2.1
+  google_generative_ai: ^0.4.7
+  provider: ^6.1.5+1
+  intl: ^0.20.2
+  shimmer: ^3.0.0
+  flutter_animate: ^4.5.2
+  shared_preferences: ^2.5.3
+  font_awesome_flutter: ^10.10.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - .env
+
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: fonts/Poppins-Regular.ttf
+        - asset: fonts/Poppins-Bold.ttf
+          weight: 700
+    - family: Pacifico
+      fonts:
+        - asset: fonts/Pacifico-Regular.ttf
+    - family: OpenSans
+      fonts:
+        - asset: assets/fonts/OpenSans-Regular.ttf
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/Roboto-Regular.ttf
