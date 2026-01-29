@@ -19,8 +19,36 @@ class AnxietyDataProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get isChartLoading => _isChartLoading;
 
+  String? _currentUserId;
+
   AnxietyDataProvider() {
+    // Kullanıcı değişikliklerini dinle
+    _auth.authStateChanges().listen(_onAuthStateChanged);
     if (_auth.currentUser != null) {
+      _currentUserId = _auth.currentUser!.uid;
+      fetchWeeklyAverage();
+      fetchAnxietyDataForChart();
+    }
+  }
+
+  void _onAuthStateChanged(User? user) {
+    // Kullanıcı değiştiğinde verileri temizle
+    if (user == null) {
+      // Çıkış yapıldı
+      _weeklyAverage = 0.0;
+      _anxietyChartData = [];
+      _isLoading = false;
+      _isChartLoading = false;
+      _currentUserId = null;
+      notifyListeners();
+    } else if (user.uid != _currentUserId) {
+      // Yeni kullanıcı giriş yaptı
+      _weeklyAverage = 0.0;
+      _anxietyChartData = [];
+      _isLoading = true;
+      _isChartLoading = true;
+      _currentUserId = user.uid;
+      notifyListeners();
       fetchWeeklyAverage();
       fetchAnxietyDataForChart();
     }

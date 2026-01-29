@@ -3,6 +3,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/achievement_provider.dart';
+import '../providers/journal_provider.dart';
+import '../providers/goal_provider.dart';
 
 class ThoughtRecordScreen extends StatefulWidget {
   const ThoughtRecordScreen({super.key});
@@ -67,7 +71,12 @@ class _ThoughtRecordScreenState extends State<ThoughtRecordScreen> {
           'user_id': user.uid,
         });
 
+        // Journal provider'ı güncelle, hedefleri güncelle ve başarımları kontrol et
         if (mounted) {
+          context.read<JournalProvider>().fetchJournalEntries();
+          await context.read<GoalProvider>().updateProgressByCategory('thought_records', 1);
+          context.read<AchievementProvider>().checkAchievements();
+          
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Düşünce kaydınız başarıyla kaydedildi!')),
           );

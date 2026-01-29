@@ -4,7 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../providers/auth_provider.dart';
-import 'profile_setup_screen.dart'; // <-- DOĞRU YÖNLENDİRME
+import 'profile_setup_screen.dart';
+import 'privacy_policy_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -18,6 +19,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  bool _isPolicyAccepted = false;
 
   Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
@@ -29,12 +31,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _passwordController.text.trim(),
     );
 
-
     // --- KULLANICI AKIŞI DÜZELTİLDİ ---
     if (success && mounted) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const ProfileSetupScreen()),
-      );
+      // Verify user is actually signed in before navigating
+      // Wait a brief moment for auth state to propagate
+      await Future.delayed(const Duration(milliseconds: 100));
+      
+      // Double-check that user is authenticated
+      if (authProvider.status == AuthStatus.Authenticated && mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const ProfileSetupScreen()),
+        );
+      } else if (mounted) {
+        // If still not authenticated, show error
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Hesap oluşturuldu ancak otomatik giriş yapılamadı. Lütfen giriş yapın.'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
     }
   }
 
@@ -126,15 +142,63 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     },
                   ).animate().fade(delay: 600.ms).slideX(begin: -0.5),
 
+                  // Import eklendi (dosyanın en üstüne eklenmeli ama burada sadece arayüzü değiştiriyoruz)
+                  
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: 24,
+                        child: Checkbox(
+                          value: _isPolicyAccepted,
+                          onChanged: (val) {
+                            setState(() {
+                              _isPolicyAccepted = val ?? false;
+                            });
+                          },
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                             Navigator.push(context, MaterialPageRoute(builder: (context) => const PrivacyPolicyScreen()));
+                          },
+                          child: RichText(
+                            text: TextSpan(
+                              style: theme.textTheme.bodySmall,
+                              children: [
+                                const TextSpan(text: 'Kayıt olarak '),
+                                TextSpan(
+                                  text: 'Kullanıcı Sözleşmesi',
+                                  style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.bold),
+                                ),
+                                const TextSpan(text: ' ve '),
+                                TextSpan(
+                                  text: 'KVKK Metnini',
+                                  style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.bold),
+                                ),
+                                const TextSpan(text: ' kabul ediyorum.'),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ).animate().fade(delay: 650.ms).slideX(begin: -0.5),
+
                   const SizedBox(height: 24),
 
                   authProvider.status == AuthStatus.Authenticating
                       ? const Center(child: CircularProgressIndicator())
-                      : ElevatedButton(
-                    onPressed: _register,
-                    style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-                    child: const Text('Kayıt Ol', style: TextStyle(fontSize: 16)),
-                  ).animate().fade(delay: 700.ms).slideY(begin: 0.5),
+                      : Opacity(
+                          opacity: _isPolicyAccepted ? 1.0 : 0.5,
+                          child: ElevatedButton(
+                            onPressed: _isPolicyAccepted ? _register : null,
+                            style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                            child: const Text('Kayıt Ol', style: TextStyle(fontSize: 16)),
+                          ),
+                        ).animate().fade(delay: 700.ms).slideY(begin: 0.5),
 
                   const SizedBox(height: 12),
 

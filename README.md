@@ -14,3 +14,5 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+dostum şimdi bu en ust bardaki ayarlar kısmı gidebilir vordaki ozellikler profil kısmına gelsin ve günlük kısmında günlük yazıları orda kalsın fakat yapay zeka analizlerim kısmı yukarı bara gelen profilin yanında olsun gunluk yazma yeri suanda profil sekmesinin bulundugu yerde bulunsun

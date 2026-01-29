@@ -36,12 +36,22 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
 
     // Kaydetme işini UserDataProvider'a devrediyoruz.
     // Bu fonksiyonu daha önce Ayarlar ekranı için yazmıştık!
-    await context.read<UserDataProvider>().updateUserData(newData);
+    final success = await context.read<UserDataProvider>().updateUserData(newData);
 
     if (mounted) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-      );
+      if (success) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Profil bilgileri kaydedilirken bir hata oluştu. Lütfen tekrar deneyin.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        setState(() { _isSaving = false; });
+      }
     }
   }
 
@@ -57,58 +67,62 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text('Son Bir Adım Kaldı!', style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold))
-                      .animate().fade(duration: 400.ms).slideY(begin: -0.5),
-                  const SizedBox(height: 8),
-                  Text('Bu bilgiler, deneyimini kişiselleştirmemize yardımcı olacak.', style: theme.textTheme.titleMedium?.copyWith(color: Colors.grey))
-                      .animate().fade(delay: 200.ms, duration: 400.ms).slideY(begin: -0.5),
+    return PopScope(
+      // Geri tuşuna basıldığında hiçbir şey yapma (profil tamamlanmadan çıkış yapılamaz)
+      canPop: false,
+      child: Scaffold(
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text('Son Bir Adım Kaldı!', style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold))
+                        .animate().fade(duration: 400.ms).slideY(begin: -0.5),
+                    const SizedBox(height: 8),
+                    Text('Bu bilgiler, deneyimini kişiselleştirmemize yardımcı olacak.', style: theme.textTheme.titleMedium?.copyWith(color: Colors.grey))
+                        .animate().fade(delay: 200.ms, duration: 400.ms).slideY(begin: -0.5),
 
-                  const SizedBox(height: 40),
+                    const SizedBox(height: 40),
 
-                  TextFormField(
-                    controller: _nameController,
-                    decoration: InputDecoration(labelText: 'Adın ve Soyadın', border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), prefixIcon: const Icon(FlutterRemix.user_line)),
-                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Bu alan boş bırakılamaz' : null,
-                  ).animate().fade(delay: 400.ms).slideX(begin: -0.5),
+                    TextFormField(
+                      controller: _nameController,
+                      decoration: InputDecoration(labelText: 'Adın ve Soyadın', border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), prefixIcon: const Icon(FlutterRemix.user_line)),
+                      validator: (v) => (v == null || v.trim().isEmpty) ? 'Bu alan boş bırakılamaz' : null,
+                    ).animate().fade(delay: 400.ms).slideX(begin: -0.5),
 
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
-                  TextFormField(
-                    controller: _ageController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(labelText: 'Yaşın', border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), prefixIcon: const Icon(FlutterRemix.cake_line)),
-                    validator: (v) => (v == null || v.trim().isEmpty || int.tryParse(v.trim()) == null) ? 'Geçerli bir yaş girin' : null,
-                  ).animate().fade(delay: 500.ms).slideX(begin: 0.5),
+                    TextFormField(
+                      controller: _ageController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(labelText: 'Yaşın', border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), prefixIcon: const Icon(FlutterRemix.cake_line)),
+                      validator: (v) => (v == null || v.trim().isEmpty || int.tryParse(v.trim()) == null) ? 'Geçerli bir yaş girin' : null,
+                    ).animate().fade(delay: 500.ms).slideX(begin: 0.5),
 
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
-                  TextFormField(
-                    controller: _professionController,
-                    decoration: InputDecoration(labelText: 'Mesleğin', border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), prefixIcon: const Icon(FlutterRemix.briefcase_line)),
-                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Bu alan boş bırakılamaz' : null,
-                  ).animate().fade(delay: 600.ms).slideX(begin: -0.5),
+                    TextFormField(
+                      controller: _professionController,
+                      decoration: InputDecoration(labelText: 'Mesleğin', border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), prefixIcon: const Icon(FlutterRemix.briefcase_line)),
+                      validator: (v) => (v == null || v.trim().isEmpty) ? 'Bu alan boş bırakılamaz' : null,
+                    ).animate().fade(delay: 600.ms).slideX(begin: -0.5),
 
-                  const SizedBox(height: 32),
+                    const SizedBox(height: 32),
 
-                  _isSaving
-                      ? const Center(child: CircularProgressIndicator())
-                      : ElevatedButton(
-                    onPressed: _saveProfile,
-                    style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-                    child: const Text('Kaydet ve Başla', style: TextStyle(fontSize: 16)),
-                  ).animate().fade(delay: 700.ms).slideY(begin: 0.5),
-                ],
+                    _isSaving
+                        ? const Center(child: CircularProgressIndicator())
+                        : ElevatedButton(
+                      onPressed: _saveProfile,
+                      style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                      child: const Text('Kaydet ve Başla', style: TextStyle(fontSize: 16)),
+                    ).animate().fade(delay: 700.ms).slideY(begin: 0.5),
+                  ],
+                ),
               ),
             ),
           ),

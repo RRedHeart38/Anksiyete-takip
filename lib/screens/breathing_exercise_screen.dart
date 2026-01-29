@@ -1,131 +1,145 @@
 // lib/screens/breathing_exercise_screen.dart
 
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart'; // <-- YENİ İMPORT
-import 'breathing_478_screen.dart';
-import 'breathing_box_screen.dart';
-import 'breathing_diaphragmatic_screen.dart';
-import 'breathing_deep_screen.dart';
-import 'breathing_alternate_nostril_screen.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_remix/flutter_remix.dart';
+import '../models/breathing_pattern.dart';
+import 'universal_breathing_player_screen.dart';
 
 class BreathingExerciseScreen extends StatelessWidget {
   final String? exerciseType;
 
   const BreathingExerciseScreen({super.key, this.exerciseType});
 
-  Widget _getExerciseScreen(String? type) {
-    switch (type) {
-      case '4-7-8 Nefesi':
-      case '4-7-8 Tekniği':
-        return const Breathing478Screen();
-      case 'Kutu Nefesi':
-      case 'Kare Nefesi':
-        return const BreathingBoxScreen();
-      case 'Diyafram Nefesi':
-        return const BreathingDiaphragmaticScreen();
-      case 'Odaklanmış Nefes':
-      case 'Odaklanmış Nefes Egzersizi':
-      case 'Derin Nefes Egzersizi':
-      case 'Derin Karın Nefesi': // Sohbet ekranından gelebilecek yeni bir varyasyon
-        return const BreathingDeepScreen();
-      case 'Alternatif Burun Nefesi':
-        return const BreathingAlternateNostrilScreen();
-      default:
-      // Bilinmeyen bir egzersiz türü gelirse, ana listeye yönlendir.
-        return const BreathingExerciseScreen();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    // Check if we came from AI Chat with a specific type
     if (exerciseType != null) {
-      return _getExerciseScreen(exerciseType);
+      final patterns = BreathingPattern.getPatterns();
+      // Try to find matching pattern logic (simple string matching)
+      try {
+        final pattern = patterns.firstWhere((p) => 
+          p.title == exerciseType || 
+          p.title.contains(exerciseType!) || 
+          exerciseType!.contains(p.id)
+        , orElse: () => patterns.first);
+        
+        return UniversalBreathingPlayerScreen(pattern: pattern);
+      } catch (e) {
+        // Fallback to normal list if not found
+      }
     }
 
+    final patterns = BreathingPattern.getPatterns();
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Nefes Egzersizleri'),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
+      body: ListView.builder(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Bir nefes egzersizi seçin',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: theme.colorScheme.primary,
+        itemCount: patterns.length + 1, // +1 for header
+        itemBuilder: (context, index) {
+          if (index == 0) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Nefesini Keşfet',
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ).animate().fadeIn().slideX(),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Doğru nefes almak, stresi yönetmenin en hızlı yoludur. İhtiyacına uygun bir teknik seç.',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: theme.textTheme.bodyMedium?.color?.withOpacity(0.8),
+                    ),
+                  ).animate().fadeIn(delay: 100.ms),
+                ],
               ),
-            ),
-            const SizedBox(height: 16),
-            _buildExerciseCard(
-              context,
-              title: '4-7-8 Tekniği',
-              description: 'Anksiyete ve stresi hızla azaltmak için.',
-              icon: Icons.access_alarm,
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const Breathing478Screen())),
-            ).animate().fade(delay: 100.ms).slideX(),
-            _buildExerciseCard(
-              context,
-              title: 'Kutu Nefesi',
-              description: 'Odaklanmayı ve sakinleşmeyi sağlar.',
-              icon: Icons.square_foot_outlined,
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const BreathingBoxScreen())),
-            ).animate().fade(delay: 200.ms).slideX(),
-            _buildExerciseCard(
-              context,
-              title: 'Diyafram Nefesi',
-              description: 'Karından nefes alarak gevşemeyi aktive eder.',
-              icon: Icons.spa_outlined,
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const BreathingDiaphragmaticScreen())),
-            ).animate().fade(delay: 300.ms).slideX(),
-            _buildExerciseCard(
-              context,
-              title: 'Derin Nefes Egzersizi',
-              description: 'Kapasitenizi kullanarak yavaşça nefes alın.',
-              icon: Icons.favorite_border_outlined,
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const BreathingDeepScreen())),
-            ).animate().fade(delay: 400.ms).slideX(),
-            _buildExerciseCard(
-              context,
-              title: 'Alternatif Burun Nefesi',
-              description: 'Vücut dengesini ve zihni sakinleştirmeye yardımcı olur.',
-              icon: Icons.air,
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const BreathingAlternateNostrilScreen())),
-            ).animate().fade(delay: 500.ms).slideX(),
-          ],
-        ),
+            );
+          }
+          
+          final pattern = patterns[index - 1];
+          return _buildExerciseCard(context, pattern, index).animate().fadeIn(delay: (200 + (index * 100)).ms).slideY(begin: 0.1, end: 0);
+        },
       ),
     );
   }
 
-  Widget _buildExerciseCard(BuildContext context, {
-    required String title,
-    required String description,
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
+  Widget _buildExerciseCard(BuildContext context, BreathingPattern pattern, int index) {
     final theme = Theme.of(context);
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        leading: CircleAvatar(
-          backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
-          child: Icon(icon, color: theme.colorScheme.primary),
+    final color = pattern.color;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.05), // Dark mode friendly opacity
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1), width: 1),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: () {
+            Navigator.push(
+              context, 
+              MaterialPageRoute(builder: (context) => UniversalBreathingPlayerScreen(pattern: pattern))
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(FlutterRemix.lungs_line, color: color, size: 28),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        pattern.title,
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        pattern.description,
+                        style: TextStyle(fontSize: 14, color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7)),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.grey[400]),
+              ],
+            ),
+          ),
         ),
-        title: Text(title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-        subtitle: Text(description, style: theme.textTheme.bodyMedium),
-        trailing: Icon(Icons.arrow_forward_ios, size: 16, color: theme.colorScheme.onSurface.withOpacity(0.5)),
-        onTap: onTap,
       ),
     );
   }

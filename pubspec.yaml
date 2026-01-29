@@ -5,17 +5,17 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.9.0 <4.0.0' # Dart SDK sürümü güncellendi
+  sdk: '>=3.8.0 <4.0.0' # Dart SDK sürümü
 
 dependencies:
   flutter:
     sdk: flutter
 
-  # Firebase Paketleri (Güncel ve Uyumlu Versiyonlar)
-  firebase_core: ^2.24.2 # Bu satırı bu versiyona getir
-  firebase_auth: ^4.15.2  # Bu satırı bu versiyona getir
-  cloud_firestore: ^4.13.6
-  firebase_storage: ^11.5.6
+  # Firebase Paketleri (Stabil ve Uyumlu Versiyonlar)
+  firebase_core: ^3.6.0
+  firebase_auth: ^5.3.0
+  cloud_firestore: ^5.4.4
+  firebase_storage: ^12.3.2
   google_sign_in: ^6.2.1
 
   # Diğer Bağımlılıklar (Kontrol edip güncel tutabilirsin)
@@ -37,7 +37,9 @@ dependencies:
   shimmer: ^3.0.0
   flutter_animate: ^4.5.2
   shared_preferences: ^2.5.3
-  font_awesome_flutter: ^10.10.0
+  font_awesome_flutter: ^10.9.1
+  timezone: ^0.9.4
+  encrypt: ^5.0.3
 
 dev_dependencies:
   flutter_test:

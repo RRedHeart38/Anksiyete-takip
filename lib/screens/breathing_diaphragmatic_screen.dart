@@ -1,6 +1,11 @@
 // lib/screens/breathing_diaphragmatic_screen.dart
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+import '../providers/achievement_provider.dart';
+import '../providers/goal_provider.dart';
 
 class BreathingDiaphragmaticScreen extends StatefulWidget {
   const BreathingDiaphragmaticScreen({super.key});
@@ -14,6 +19,7 @@ class _BreathingDiaphragmaticScreenState extends State<BreathingDiaphragmaticScr
   late Animation<double> _scaleAnimation;
   String _guidingText = 'Başlamak için dokun';
   bool _isExercising = false;
+  bool _hasRecorded = false;
   int _countdown = 0;
 
   final List<Map<String, dynamic>> _phases = [
@@ -33,8 +39,36 @@ class _BreathingDiaphragmaticScreenState extends State<BreathingDiaphragmaticScr
     );
   }
 
+  Future<void> _recordBreathingExercise() async {
+    if (_hasRecorded) return;
+    
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('breathing_exercises')
+          .add({
+        'exercise_type': 'Diyafram Nefesi',
+        'tarih': Timestamp.now(),
+      });
+      
+      _hasRecorded = true;
+      
+      if (mounted) {
+        context.read<AchievementProvider>().checkAchievements();
+        await context.read<GoalProvider>().updateProgressByCategory('breathing', 1);
+      }
+    } catch (e) {
+      print('Nefes egzersizi kaydedilirken hata: $e');
+    }
+  }
+
   void _startExercise() async {
     if (_isExercising) return;
+    await _recordBreathingExercise();
     setState(() {
       _isExercising = true;
       _startPhase(0);

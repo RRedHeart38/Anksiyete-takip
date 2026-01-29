@@ -22,8 +22,31 @@ class JournalProvider with ChangeNotifier {
   List<JournalEntry> get entries => _entries;
   bool get isLoading => _isLoading;
 
+  String? _currentUserId;
+
   JournalProvider() {
+    // Kullanıcı değişikliklerini dinle
+    _auth.authStateChanges().listen(_onAuthStateChanged);
     if (_auth.currentUser != null) {
+      _currentUserId = _auth.currentUser!.uid;
+      fetchJournalEntries();
+    }
+  }
+
+  void _onAuthStateChanged(User? user) {
+    // Kullanıcı değiştiğinde verileri temizle
+    if (user == null) {
+      // Çıkış yapıldı
+      _entries = [];
+      _isLoading = false;
+      _currentUserId = null;
+      notifyListeners();
+    } else if (user.uid != _currentUserId) {
+      // Yeni kullanıcı giriş yaptı
+      _entries = [];
+      _isLoading = true;
+      _currentUserId = user.uid;
+      notifyListeners();
       fetchJournalEntries();
     }
   }
@@ -74,7 +97,24 @@ class JournalProvider with ChangeNotifier {
         );
       }));
 
-      // 3. Birleşik listeyi tarihe göre en yeniden en eskiye doğru sırala
+      // 3. Günlük yazılarını çek
+      final journalSnapshot = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('journal_entries')
+          .get();
+
+      fetchedEntries.addAll(journalSnapshot.docs.map((doc) {
+        final data = doc.data();
+        return JournalEntry(
+          id: doc.id,
+          type: 'journal',
+          date: (data['tarih'] as Timestamp).toDate(),
+          data: data,
+        );
+      }));
+
+      // 4. Birleşik listeyi tarihe göre en yeniden en eskiye doğru sırala
       fetchedEntries.sort((a, b) => b.date.compareTo(a.date));
 
       _entries = fetchedEntries;
@@ -84,6 +124,32 @@ class JournalProvider with ChangeNotifier {
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<bool> saveJournalEntry(String title, String content) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      return false;
+    }
+
+    try {
+      await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('journal_entries')
+          .add({
+        'baslik': title,
+        'icerik': content,
+        'tarih': Timestamp.now(),
+      });
+
+      // Günlük yazılarını yeniden yükle
+      await fetchJournalEntries();
+      return true;
+    } catch (e) {
+      print("Günlük yazısı kaydedilirken hata oluştu: $e");
+      return false;
     }
   }
 }

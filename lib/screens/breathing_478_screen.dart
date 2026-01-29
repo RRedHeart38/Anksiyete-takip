@@ -1,6 +1,11 @@
 // lib/screens/breathing_478_screen.dart
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+import '../providers/achievement_provider.dart';
+import '../providers/goal_provider.dart';
 
 class Breathing478Screen extends StatefulWidget {
   const Breathing478Screen({super.key});
@@ -14,6 +19,7 @@ class _Breathing478ScreenState extends State<Breathing478Screen> with SingleTick
   late Animation<double> _scaleAnimation;
   String _guidingText = 'Başlamak için dokun';
   bool _isExercising = false;
+  bool _hasRecorded = false;
   int _countdown = 0;
 
   final List<Map<String, dynamic>> _phases = [
@@ -34,9 +40,39 @@ class _Breathing478ScreenState extends State<Breathing478Screen> with SingleTick
     );
   }
 
+  Future<void> _recordBreathingExercise() async {
+    if (_hasRecorded) return; // Aynı oturumda sadece bir kez kayıt yap
+    
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('breathing_exercises')
+          .add({
+        'exercise_type': '4-7-8 Tekniği',
+        'tarih': Timestamp.now(),
+      });
+      
+      _hasRecorded = true;
+      
+      // Başarımları kontrol et
+      if (mounted) {
+        context.read<AchievementProvider>().checkAchievements();
+        // Hedefleri güncelle
+        await context.read<GoalProvider>().updateProgressByCategory('breathing', 1);
+      }
+    } catch (e) {
+      print('Nefes egzersizi kaydedilirken hata: $e');
+    }
+  }
+
   void _startExercise() {
     if (_isExercising) return;
     _isExercising = true;
+    _recordBreathingExercise(); // Kayıt yap
     _startPhase(0);
   }
 

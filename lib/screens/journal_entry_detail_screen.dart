@@ -13,6 +13,7 @@ class JournalEntryDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isThoughtRecord = entry.type == 'thought';
+    final bool isJournalEntry = entry.type == 'journal';
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -26,13 +27,19 @@ class JournalEntryDetailScreen extends StatelessWidget {
           children: [
             // Kayıt tipine göre başlık göster
             Text(
-              isThoughtRecord ? 'Düşünce Kaydı Detayları' : 'Anksiyete Kaydı Detayları',
+              isJournalEntry 
+                ? 'Günlük Yazısı'
+                : isThoughtRecord 
+                  ? 'Düşünce Kaydı Detayları' 
+                  : 'Anksiyete Kaydı Detayları',
               style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 24),
 
             // Kayıt tipine göre ilgili veri alanlarını göster
-            if (isThoughtRecord)
+            if (isJournalEntry)
+              ..._buildJournalEntryDetails(entry.data)
+            else if (isThoughtRecord)
               ..._buildThoughtRecordDetails(entry.data)
             else
               ..._buildAnxietyEntryDetails(entry.data),
@@ -51,7 +58,7 @@ class JournalEntryDetailScreen extends StatelessWidget {
                 onPressed: () {
                   // ChatProvider'daki analiz fonksiyonunu çağır
                   context.read<ChatProvider>().analyzeJournalEntry(entry);
-                  context.read<NavigationProvider>().changeTab(3);
+                  context.read<NavigationProvider>().changeTab(2);
 
                   // Detay ekranını kapatıp ana ekrana dön
                   Navigator.of(context).popUntil((route) => route.isFirst);
@@ -75,7 +82,6 @@ class JournalEntryDetailScreen extends StatelessWidget {
     return [
       _buildDetailRow('Kaygı Seviyesi:', (data['kaygiSeviyesi'] ?? 0).toString()),
       _buildDetailRow('Tetikleyici:', data['tetikleyici'] ?? 'Belirtilmemiş'),
-      _buildDetailRow('Notlar:', data['notlar'] ?? 'Ek not yok'),
     ];
   }
 
@@ -88,6 +94,24 @@ class JournalEntryDetailScreen extends StatelessWidget {
       _buildDetailRow('4. Kanıtlar:', data['kanitlar'] ?? ''),
       _buildDetailRow('5. Karşı Kanıtlar:', data['karsi_kanitlar'] ?? ''),
       _buildDetailRow('6. Alternatif Düşünce:', data['alternatif_dusunce'] ?? ''),
+    ];
+  }
+
+  // Günlük yazısı detaylarını oluşturan yardımcı metod
+  List<Widget> _buildJournalEntryDetails(Map<String, dynamic> data) {
+    final title = data['baslik'] ?? 'Başlıksız';
+    final content = data['icerik'] ?? '';
+    
+    return [
+      Text(
+        title,
+        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      ),
+      const SizedBox(height: 16),
+      Text(
+        content,
+        style: const TextStyle(fontSize: 16, height: 1.6),
+      ),
     ];
   }
 

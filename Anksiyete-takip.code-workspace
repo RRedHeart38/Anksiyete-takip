@@ -1,0 +1,50 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../assets"
+		},
+		{
+			"path": "../build"
+		},
+		{
+			"path": "../fonts"
+		},
+		{
+			"path": "../ios"
+		},
+		{
+			"path": "../lib"
+		},
+		{
+			"path": "../linux"
+		},
+		{
+			"path": "../macos"
+		},
+		{
+			"path": "../test"
+		},
+		{
+			"path": "../web"
+		},
+		{
+			"path": "../windows"
+		},
+		{
+			"path": "../.dart_tool"
+		},
+		{
+			"path": "../.git"
+		},
+		{
+			"path": "../.idea"
+		},
+		{
+			"path": "../android"
+		}
+	],
+	"settings": {}
+}

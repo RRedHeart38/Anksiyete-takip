@@ -1,0 +1,200 @@
+﻿> Task :gradle:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle:compileKotlin UP-TO-DATE
+> Task :gradle:compileJava NO-SOURCE
+> Task :gradle:compileGroovy NO-SOURCE
+> Task :gradle:pluginDescriptors UP-TO-DATE
+> Task :gradle:processResources UP-TO-DATE
+> Task :gradle:classes UP-TO-DATE
+> Task :gradle:jar UP-TO-DATE
+
+> Task :app:signingReport
+Variant: debug
+Config: debug
+Store: C:\Users\PC\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 47:8F:B7:B1:49:B3:C5:77:91:75:18:97:CC:7D:0C:A8
+SHA1: C3:A2:2B:98:EB:F9:28:D6:88:3B:56:43:86:93:E1:52:1A:61:F7:08
+SHA-256: 1D:03:4F:9C:2A:39:7F:17:14:D0:3F:66:83:0C:7C:60:E6:E8:28:BE:BA:D8:89:27:71:2F:D1:C5:80:6C:8C:5D
+Valid until: 14 Temmuz 2055 ├çar┼şamba
+----------
+Variant: release
+Config: debug
+Store: C:\Users\PC\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 47:8F:B7:B1:49:B3:C5:77:91:75:18:97:CC:7D:0C:A8
+SHA1: C3:A2:2B:98:EB:F9:28:D6:88:3B:56:43:86:93:E1:52:1A:61:F7:08
+SHA-256: 1D:03:4F:9C:2A:39:7F:17:14:D0:3F:66:83:0C:7C:60:E6:E8:28:BE:BA:D8:89:27:71:2F:D1:C5:80:6C:8C:5D
+Valid until: 14 Temmuz 2055 ├çar┼şamba
+----------
+Variant: profile
+Config: debug
+Store: C:\Users\PC\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 47:8F:B7:B1:49:B3:C5:77:91:75:18:97:CC:7D:0C:A8
+SHA1: C3:A2:2B:98:EB:F9:28:D6:88:3B:56:43:86:93:E1:52:1A:61:F7:08
+SHA-256: 1D:03:4F:9C:2A:39:7F:17:14:D0:3F:66:83:0C:7C:60:E6:E8:28:BE:BA:D8:89:27:71:2F:D1:C5:80:6C:8C:5D
+Valid until: 14 Temmuz 2055 ├çar┼şamba
+----------
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\PC\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 47:8F:B7:B1:49:B3:C5:77:91:75:18:97:CC:7D:0C:A8
+SHA1: C3:A2:2B:98:EB:F9:28:D6:88:3B:56:43:86:93:E1:52:1A:61:F7:08
+SHA-256: 1D:03:4F:9C:2A:39:7F:17:14:D0:3F:66:83:0C:7C:60:E6:E8:28:BE:BA:D8:89:27:71:2F:D1:C5:80:6C:8C:5D
+Valid until: 14 Temmuz 2055 ├çar┼şamba
+----------
+
+> Task :cloud_firestore:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\PC\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 47:8F:B7:B1:49:B3:C5:77:91:75:18:97:CC:7D:0C:A8
+SHA1: C3:A2:2B:98:EB:F9:28:D6:88:3B:56:43:86:93:E1:52:1A:61:F7:08
+SHA-256: 1D:03:4F:9C:2A:39:7F:17:14:D0:3F:66:83:0C:7C:60:E6:E8:28:BE:BA:D8:89:27:71:2F:D1:C5:80:6C:8C:5D
+Valid until: 14 Temmuz 2055 ├çar┼şamba
+----------
+
+> Task :firebase_auth:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\PC\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 47:8F:B7:B1:49:B3:C5:77:91:75:18:97:CC:7D:0C:A8
+SHA1: C3:A2:2B:98:EB:F9:28:D6:88:3B:56:43:86:93:E1:52:1A:61:F7:08
+SHA-256: 1D:03:4F:9C:2A:39:7F:17:14:D0:3F:66:83:0C:7C:60:E6:E8:28:BE:BA:D8:89:27:71:2F:D1:C5:80:6C:8C:5D
+Valid until: 14 Temmuz 2055 ├çar┼şamba
+----------
+
+> Task :firebase_core:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\PC\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 47:8F:B7:B1:49:B3:C5:77:91:75:18:97:CC:7D:0C:A8
+SHA1: C3:A2:2B:98:EB:F9:28:D6:88:3B:56:43:86:93:E1:52:1A:61:F7:08
+SHA-256: 1D:03:4F:9C:2A:39:7F:17:14:D0:3F:66:83:0C:7C:60:E6:E8:28:BE:BA:D8:89:27:71:2F:D1:C5:80:6C:8C:5D
+Valid until: 14 Temmuz 2055 ├çar┼şamba
+----------
+
+> Task :firebase_storage:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\PC\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 47:8F:B7:B1:49:B3:C5:77:91:75:18:97:CC:7D:0C:A8
+SHA1: C3:A2:2B:98:EB:F9:28:D6:88:3B:56:43:86:93:E1:52:1A:61:F7:08
+SHA-256: 1D:03:4F:9C:2A:39:7F:17:14:D0:3F:66:83:0C:7C:60:E6:E8:28:BE:BA:D8:89:27:71:2F:D1:C5:80:6C:8C:5D
+Valid until: 14 Temmuz 2055 ├çar┼şamba
+----------
+
+> Task :flutter_local_notifications:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\PC\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 47:8F:B7:B1:49:B3:C5:77:91:75:18:97:CC:7D:0C:A8
+SHA1: C3:A2:2B:98:EB:F9:28:D6:88:3B:56:43:86:93:E1:52:1A:61:F7:08
+SHA-256: 1D:03:4F:9C:2A:39:7F:17:14:D0:3F:66:83:0C:7C:60:E6:E8:28:BE:BA:D8:89:27:71:2F:D1:C5:80:6C:8C:5D
+Valid until: 14 Temmuz 2055 ├çar┼şamba
+----------
+
+> Task :flutter_plugin_android_lifecycle:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\PC\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 47:8F:B7:B1:49:B3:C5:77:91:75:18:97:CC:7D:0C:A8
+SHA1: C3:A2:2B:98:EB:F9:28:D6:88:3B:56:43:86:93:E1:52:1A:61:F7:08
+SHA-256: 1D:03:4F:9C:2A:39:7F:17:14:D0:3F:66:83:0C:7C:60:E6:E8:28:BE:BA:D8:89:27:71:2F:D1:C5:80:6C:8C:5D
+Valid until: 14 Temmuz 2055 ├çar┼şamba
+----------
+
+> Task :google_sign_in_android:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\PC\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 47:8F:B7:B1:49:B3:C5:77:91:75:18:97:CC:7D:0C:A8
+SHA1: C3:A2:2B:98:EB:F9:28:D6:88:3B:56:43:86:93:E1:52:1A:61:F7:08
+SHA-256: 1D:03:4F:9C:2A:39:7F:17:14:D0:3F:66:83:0C:7C:60:E6:E8:28:BE:BA:D8:89:27:71:2F:D1:C5:80:6C:8C:5D
+Valid until: 14 Temmuz 2055 ├çar┼şamba
+----------
+
+> Task :image_picker_android:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\PC\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 47:8F:B7:B1:49:B3:C5:77:91:75:18:97:CC:7D:0C:A8
+SHA1: C3:A2:2B:98:EB:F9:28:D6:88:3B:56:43:86:93:E1:52:1A:61:F7:08
+SHA-256: 1D:03:4F:9C:2A:39:7F:17:14:D0:3F:66:83:0C:7C:60:E6:E8:28:BE:BA:D8:89:27:71:2F:D1:C5:80:6C:8C:5D
+Valid until: 14 Temmuz 2055 ├çar┼şamba
+----------
+
+> Task :path_provider_android:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\PC\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 47:8F:B7:B1:49:B3:C5:77:91:75:18:97:CC:7D:0C:A8
+SHA1: C3:A2:2B:98:EB:F9:28:D6:88:3B:56:43:86:93:E1:52:1A:61:F7:08
+SHA-256: 1D:03:4F:9C:2A:39:7F:17:14:D0:3F:66:83:0C:7C:60:E6:E8:28:BE:BA:D8:89:27:71:2F:D1:C5:80:6C:8C:5D
+Valid until: 14 Temmuz 2055 ├çar┼şamba
+----------
+
+> Task :permission_handler_android:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\PC\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 47:8F:B7:B1:49:B3:C5:77:91:75:18:97:CC:7D:0C:A8
+SHA1: C3:A2:2B:98:EB:F9:28:D6:88:3B:56:43:86:93:E1:52:1A:61:F7:08
+SHA-256: 1D:03:4F:9C:2A:39:7F:17:14:D0:3F:66:83:0C:7C:60:E6:E8:28:BE:BA:D8:89:27:71:2F:D1:C5:80:6C:8C:5D
+Valid until: 14 Temmuz 2055 ├çar┼şamba
+----------
+
+> Task :printing:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\PC\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 47:8F:B7:B1:49:B3:C5:77:91:75:18:97:CC:7D:0C:A8
+SHA1: C3:A2:2B:98:EB:F9:28:D6:88:3B:56:43:86:93:E1:52:1A:61:F7:08
+SHA-256: 1D:03:4F:9C:2A:39:7F:17:14:D0:3F:66:83:0C:7C:60:E6:E8:28:BE:BA:D8:89:27:71:2F:D1:C5:80:6C:8C:5D
+Valid until: 14 Temmuz 2055 ├çar┼şamba
+----------
+
+> Task :shared_preferences_android:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\PC\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 47:8F:B7:B1:49:B3:C5:77:91:75:18:97:CC:7D:0C:A8
+SHA1: C3:A2:2B:98:EB:F9:28:D6:88:3B:56:43:86:93:E1:52:1A:61:F7:08
+SHA-256: 1D:03:4F:9C:2A:39:7F:17:14:D0:3F:66:83:0C:7C:60:E6:E8:28:BE:BA:D8:89:27:71:2F:D1:C5:80:6C:8C:5D
+Valid until: 14 Temmuz 2055 ├çar┼şamba
+----------
+
+> Task :url_launcher_android:signingReport
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\PC\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: 47:8F:B7:B1:49:B3:C5:77:91:75:18:97:CC:7D:0C:A8
+SHA1: C3:A2:2B:98:EB:F9:28:D6:88:3B:56:43:86:93:E1:52:1A:61:F7:08
+SHA-256: 1D:03:4F:9C:2A:39:7F:17:14:D0:3F:66:83:0C:7C:60:E6:E8:28:BE:BA:D8:89:27:71:2F:D1:C5:80:6C:8C:5D
+Valid until: 14 Temmuz 2055 ├çar┼şamba
+----------
+
+[Incubating] Problems report is available at: file:///C:/Users/PC/Documents/anksiyete-takip/Anksiyete-takip/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.12/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 2s
+18 actionable tasks: 14 executed, 4 up-to-date

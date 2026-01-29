@@ -5,11 +5,11 @@ import 'package:firebase_core/firebase_core.dart';
 // --- DÜZELTME: Bu pakete bir takma ad (ön ek) veriyoruz ---
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_application_1/firebase_options.dart';
 import 'package:flutter_application_1/screens/home_screen.dart';
 import 'package:flutter_application_1/screens/login_screen.dart';
 import 'package:flutter_application_1/screens/onboarding_screen.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:provider/provider.dart';
@@ -20,9 +20,19 @@ import 'package:flutter_application_1/providers/anxiety_data_provider.dart';
 import 'package:flutter_application_1/providers/chat_provider.dart';
 import 'package:flutter_application_1/providers/journal_provider.dart';
 import 'package:flutter_application_1/providers/navigation_provider.dart';
+import 'package:flutter_application_1/providers/achievement_provider.dart';
+import 'package:flutter_application_1/providers/goal_provider.dart';
+import 'package:flutter_application_1/services/notification_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // .env dosyasını yükle (API key'ler için)
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    print('UYARI: .env dosyası yüklenemedi. API key\'ler çalışmayabilir: $e');
+  }
 
   final prefs = await SharedPreferences.getInstance();
   final bool hasSeenOnboarding = prefs.getBool('hasSeenOnboarding') ?? false;
@@ -30,10 +40,8 @@ Future<void> main() async {
   tz.initializeTimeZones();
   await initializeDateFormatting('tr_TR', null);
 
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-  const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
-  final InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
-  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  // Bildirim servisi initialization'ı aşağıya, MyApp içine taşındı
+  // await notificationService.initialize(); // ANA THREAD'I KILITLEMEMEK İÇİN BURADAN KALDIRILDI
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -48,10 +56,28 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (context) => AnxietyDataProvider()),
         ChangeNotifierProvider(create: (context) => JournalProvider()),
         ChangeNotifierProvider(create: (context) => NavigationProvider()),
+        ChangeNotifierProvider(create: (context) => AchievementProvider()),
+        ChangeNotifierProxyProvider<AchievementProvider, GoalProvider>(
+          create: (context) {
+            final goalProvider = GoalProvider();
+            final achievementProvider = context.read<AchievementProvider>();
+            goalProvider.setAchievementProvider(achievementProvider);
+            return goalProvider;
+          },
+          update: (context, achievementProvider, previousGoalProvider) {
+            previousGoalProvider ??= GoalProvider();
+            previousGoalProvider.setAchievementProvider(achievementProvider);
+            return previousGoalProvider;
+          },
+        ),
         ChangeNotifierProxyProvider<UserDataProvider, ChatProvider>(
           create: (context) => ChatProvider(),
           update: (context, userDataProvider, previousChatProvider) {
-            previousChatProvider!.updateDependencies(userDataProvider);
+            previousChatProvider ??= ChatProvider();
+            previousChatProvider.updateDependencies(userDataProvider);
+            // AchievementProvider'ı güncelle
+            final achievementProvider = context.read<AchievementProvider>();
+            previousChatProvider.setAchievementProvider(achievementProvider);
             return previousChatProvider;
           },
         ),
@@ -61,9 +87,27 @@ Future<void> main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   final bool hasSeenOnboarding;
   const MyApp({super.key, required this.hasSeenOnboarding});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    // Bildirimleri burada başlatıyoruz, böylece app açılışını beklemiyor
+    _initNotifications();
+  }
+
+  Future<void> _initNotifications() async {
+    final notificationService = NotificationService();
+    await notificationService.initialize();
+    await notificationService.scheduleDailyNotifications();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +144,7 @@ class MyApp extends StatelessWidget {
         ), colorScheme: ColorScheme.fromSwatch(brightness: Brightness.dark, primarySwatch: Colors.indigo).copyWith(secondary: const Color(0xFF6366f1)),
       ),
       themeMode: themeProvider.themeMode,
-      home: hasSeenOnboarding
+      home: widget.hasSeenOnboarding
           ? const AuthWrapper()
           : const OnboardingScreen(),
     );

@@ -33,11 +33,54 @@ class AuthProvider with ChangeNotifier {
       _status = AuthStatus.Authenticating;
       _errorMessage = null;
       notifyListeners();
-      await _auth.createUserWithEmailAndPassword(email: email, password: password);
-      // Auth state listener _onAuthStateChanged will handle status update
-      return true;
+      
+      // Create user account - this automatically signs the user in
+      UserCredential? userCredential;
+      try {
+        userCredential = await _auth.createUserWithEmailAndPassword(
+          email: email, 
+          password: password
+        );
+      } catch (e) {
+        // Type cast hatası veya diğer platform hatalarını yakala
+        print('Firebase Auth platform hatası: $e');
+        // Auth state listener'dan gelen güncellemeyi bekle
+        await Future.delayed(const Duration(milliseconds: 500));
+        
+        // Kullanıcının gerçekten kayıt olup olmadığını kontrol et
+        final currentUser = _auth.currentUser;
+        if (currentUser != null && currentUser.email == email) {
+          _status = AuthStatus.Authenticated;
+          notifyListeners();
+          return true;
+        } else {
+          _errorMessage = 'Hesap oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.';
+          _status = AuthStatus.Unauthenticated;
+          notifyListeners();
+          return false;
+        }
+      }
+      
+      // Verify user is signed in and update status immediately
+      if (userCredential != null) {
+        _status = AuthStatus.Authenticated;
+        notifyListeners();
+        return true;
+      } else {
+        _errorMessage = 'Hesap oluşturulurken bir hata oluştu.';
+        _status = AuthStatus.Unauthenticated;
+        notifyListeners();
+        return false;
+      }
     } on FirebaseAuthException catch (e) {
-      _errorMessage = e.message;
+      _errorMessage = e.message ?? 'Hesap oluşturulurken bir hata oluştu.';
+      _status = AuthStatus.Unauthenticated;
+      notifyListeners();
+      return false;
+    } catch (e) {
+      // Genel hata yakalama
+      print('Beklenmeyen hata: $e');
+      _errorMessage = 'Hesap oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.';
       _status = AuthStatus.Unauthenticated;
       notifyListeners();
       return false;
@@ -49,10 +92,61 @@ class AuthProvider with ChangeNotifier {
       _status = AuthStatus.Authenticating;
       _errorMessage = null;
       notifyListeners();
-      await _auth.signInWithEmailAndPassword(email: email, password: password);
-      return true;
+      
+      // Firebase Auth işlemini try-catch ile yakalıyoruz
+      UserCredential? userCredential;
+      try {
+        userCredential = await _auth.signInWithEmailAndPassword(
+          email: email, 
+          password: password
+        );
+      } catch (e) {
+        // Type cast hatası veya diğer platform hatalarını yakala
+        print('Firebase Auth platform hatası: $e');
+        // Auth state listener'dan gelen güncellemeyi bekle
+        await Future.delayed(const Duration(milliseconds: 500));
+        
+        // Kullanıcının gerçekten giriş yapıp yapmadığını kontrol et
+        final currentUser = _auth.currentUser;
+        if (currentUser != null && currentUser.email == email) {
+          _status = AuthStatus.Authenticated;
+          notifyListeners();
+          return true;
+        } else {
+          _errorMessage = 'Giriş yapılırken bir hata oluştu. Lütfen tekrar deneyin.';
+          _status = AuthStatus.Unauthenticated;
+          notifyListeners();
+          return false;
+        }
+      }
+      
+      // Verify user is signed in and update status immediately
+      if (userCredential != null) {
+        _status = AuthStatus.Authenticated;
+        notifyListeners();
+        return true;
+      } else {
+        // Eğer userCredential null ise, currentUser'ı kontrol et
+        final currentUser = _auth.currentUser;
+        if (currentUser != null) {
+          _status = AuthStatus.Authenticated;
+          notifyListeners();
+          return true;
+        }
+        _status = AuthStatus.Unauthenticated;
+        _errorMessage = 'Giriş yapılamadı.';
+        notifyListeners();
+        return false;
+      }
     } on FirebaseAuthException catch (e) {
-      _errorMessage = e.message;
+      _errorMessage = e.message ?? 'Giriş yapılırken bir hata oluştu.';
+      _status = AuthStatus.Unauthenticated;
+      notifyListeners();
+      return false;
+    } catch (e) {
+      // Genel hata yakalama
+      print('Beklenmeyen hata: $e');
+      _errorMessage = 'Giriş yapılırken bir hata oluştu. Lütfen tekrar deneyin.';
       _status = AuthStatus.Unauthenticated;
       notifyListeners();
       return false;
@@ -96,5 +190,33 @@ class AuthProvider with ChangeNotifier {
     await _googleSignIn.signOut();
     _status = AuthStatus.Unauthenticated;
     notifyListeners();
+  }
+  Future<bool> deleteUser() async {
+    final user = _auth.currentUser;
+    if (user == null) return false;
+
+    try {
+      // Not: Kullanıcının son oturum açma zamanı eskiyse, Firebase sensitive işlem için
+      // yeniden giriş isteyebilir (requiresRecentLogin).
+      // Basitlik olması adına şimdilik direkt silmeyi deniyoruz.
+      await user.delete();
+      _status = AuthStatus.Unauthenticated;
+      notifyListeners();
+      return true;
+    } on FirebaseAuthException catch (e) {
+      print("Kullanıcı silinemedi (Auth): $e");
+      if (e.code == 'requires-recent-login') {
+        _errorMessage = "Güvenlik gereği hesabı silmek için çıkış yapıp tekrar girmelisiniz.";
+      } else {
+        _errorMessage = "Hesap silinemedi: ${e.message}";
+      }
+      notifyListeners();
+      return false;
+    } catch (e) {
+      print("Kullanıcı silinemedi (Bilinmeyen): $e");
+      _errorMessage = "Beklenmeyen bir hata oluştu.";
+      notifyListeners();
+      return false;
+    }
   }
 }

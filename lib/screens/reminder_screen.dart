@@ -36,7 +36,7 @@ class _ReminderScreenState extends State<ReminderScreen> {
       reminderText,
       tz.TZDateTime.from(scheduledTime, tz.local),
       platformChannelSpecifics,
-      androidAllowWhileIdle: true,
+      androidAllowWhileIdle: false,
       uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
