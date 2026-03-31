@@ -1,18 +1,27 @@
-# flutter_application_1
+# 🌿 CortiSync
 
-A new Flutter project.
+**CortiSync**, stres yönetimi ve biyometrik veri analitiği üzerine odaklanmış, kullanıcıların kortizol seviyelerini ve sağlık metriklerini senkronize etmesini sağlayan bir platformdur.
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## 🚀 Özellikler
 
-A few resources to get you started if this is your first Flutter project:
+* **📊 Gerçek Zamanlı Takip:** Giyilebilir cihazlardan gelen verilerin anlık analizi.
+* **🔗 Geniş Entegrasyon:** Sağlık uygulamaları ve sensörlerle tam uyum.
+* **🧠 Akıllı Analiz:** Stres paternlerini belirleyen veri modelleri.
+* **📱 Kullanıcı Dostu Arayüz:** Sade ve anlaşılır veri görselleştirme.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## 🛠️ Teknoloji Yığını
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+* **Frontend:** React / Flutter (Projene göre seçebilirsin)
+* **Backend:** Node.js / Python
+* **Veritabanı:** PostgreSQL / Firebase
+* **Veri İşleme:** Pandas / NumPy
 
-dostum şimdi bu en ust bardaki ayarlar kısmı gidebilir vordaki ozellikler profil kısmına gelsin ve günlük kısmında günlük yazıları orda kalsın fakat yapay zeka analizlerim kısmı yukarı bara gelen profilin yanında olsun gunluk yazma yeri suanda profil sekmesinin bulundugu yerde bulunsun
+## 📦 Kurulum
+
+Projeyi yerel makinenizde çalıştırmak için aşağıdaki adımları takip edin:
+
+1. **Depoyu klonlayın:**
+   ```bash
+   git clone [https://github.com/kullaniciadi/cortisync.git](https://github.com/kullaniciadi/cortisync.git)
