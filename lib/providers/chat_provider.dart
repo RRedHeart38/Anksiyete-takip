@@ -108,31 +108,34 @@ class ChatProvider with ChangeNotifier {
       initializeGemini();
       if (_chatSession == null) return;
     }
-    _isAnalyzing = true;
     final tempMessageId = 'temp_${DateTime.now().millisecondsSinceEpoch}';
-    _chatMessages.insert(0, {
-      'user_data': {'notlar': userMessage},
-      'ai_response': null,
-      'tarih': DateTime.now().toIso8601String(),
-      'source': 'chat',
-      'id': tempMessageId,
-    });
-    notifyListeners();
     try {
-      final response = await _chatSession!.sendMessage(Content.text(userMessage));
-      if (response.text != null) {
-        await _saveAIAnalysis(
-          {'notlar': userMessage},
-          response.text!,
-          'chat',
-          tempMessageId: tempMessageId,
-        );
-      } else {
+      _isAnalyzing = true;
+      _chatMessages.insert(0, {
+        'user_data': {'notlar': userMessage},
+        'ai_response': null,
+        'tarih': DateTime.now().toIso8601String(),
+        'source': 'chat',
+        'id': tempMessageId,
+      });
+      notifyListeners();
+
+      try {
+        final response = await _chatSession!.sendMessage(Content.text(userMessage));
+        if (response.text != null) {
+          await _saveAIAnalysis(
+            {'notlar': userMessage},
+            response.text!,
+            'chat',
+            tempMessageId: tempMessageId,
+          );
+        } else {
+          _replaceTempMessageWithError(tempMessageId);
+        }
+      } catch (e) {
+        print('Sohbet mesajı gönderilirken hata oluştu: $e');
         _replaceTempMessageWithError(tempMessageId);
       }
-    } catch (e) {
-      print('Sohbet mesajı gönderilirken hata oluştu: $e');
-      _replaceTempMessageWithError(tempMessageId);
     } finally {
       _isAnalyzing = false;
       notifyListeners();
