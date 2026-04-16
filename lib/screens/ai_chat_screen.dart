@@ -17,7 +17,7 @@ class AiChatScreen extends StatefulWidget {
 class _AiChatScreenState extends State<AiChatScreen> {
   final TextEditingController _chatController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  int _lastMessageCount = 0;
+  String? _lastTopMessageId;
 
   @override
   void dispose() {
@@ -56,10 +56,12 @@ class _AiChatScreenState extends State<AiChatScreen> {
   Widget build(BuildContext context) {
     return Consumer<ChatProvider>(
       builder: (context, chatProvider, child) {
-        if (chatProvider.chatMessages.length > _lastMessageCount) {
+        final messages = chatProvider.chatMessages;
+        final currentTopMessageId = messages.isNotEmpty ? messages.first['id']?.toString() : null;
+        if (currentTopMessageId != null && currentTopMessageId != _lastTopMessageId) {
           _scrollToBottom();
         }
-        _lastMessageCount = chatProvider.chatMessages.length;
+        _lastTopMessageId = currentTopMessageId;
 
         return Column(
           children: [
@@ -72,9 +74,9 @@ class _AiChatScreenState extends State<AiChatScreen> {
                 controller: _scrollController,
                 reverse: true,
                 padding: const EdgeInsets.all(16.0),
-                itemCount: chatProvider.chatMessages.length,
+                itemCount: messages.length,
                 itemBuilder: (context, index) {
-                  final message = chatProvider.chatMessages[index];
+                  final message = messages[index];
                   return _buildMessageBubble(context, message);
                 },
               ),

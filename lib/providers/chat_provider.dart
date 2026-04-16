@@ -200,7 +200,7 @@ class ChatProvider with ChangeNotifier {
           });
 
       if (tempMessageId != null) {
-        _chatMessages.removeWhere((msg) => msg['id'] == tempMessageId);
+        _removeMessageById(tempMessageId);
       }
 
       _chatMessages.insert(0, {
@@ -221,7 +221,7 @@ class ChatProvider with ChangeNotifier {
   }
 
   void _replaceTempMessageWithError(String tempMessageId) {
-    _chatMessages.removeWhere((msg) => msg['id'] == tempMessageId);
+    _removeMessageById(tempMessageId);
     _chatMessages.insert(0, {
       'id': 'error_${DateTime.now().millisecondsSinceEpoch}',
       'user_data': null,
@@ -231,6 +231,13 @@ class ChatProvider with ChangeNotifier {
       'isHelpful': null,
     });
     notifyListeners();
+  }
+
+  void _removeMessageById(String messageId) {
+    final index = _chatMessages.indexWhere((msg) => msg['id'] == messageId);
+    if (index != -1) {
+      _chatMessages.removeAt(index);
+    }
   }
 
   Future<void> saveFeedback(String docId, bool isHelpful) async {
