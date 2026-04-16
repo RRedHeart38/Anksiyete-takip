@@ -222,8 +222,7 @@ class ChatProvider with ChangeNotifier {
     _chatMessages.insert(0, {
       'id': 'error_${DateTime.now().millisecondsSinceEpoch}',
       'user_data': null,
-      'ai_response':
-          'Şu anda yanıt oluşturulamadı. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.',
+      'ai_response': 'Şu anda yanıt oluşturulamadı. Lütfen tekrar deneyin.',
       'tarih': DateTime.now().toIso8601String(),
       'source': 'chat',
       'isHelpful': null,

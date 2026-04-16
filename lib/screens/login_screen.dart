@@ -24,10 +24,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
-    if (context.read<AuthProvider>().status == AuthStatus.Authenticating) return;
+    final authProvider = context.read<AuthProvider>();
+    if (authProvider.status == AuthStatus.Authenticating) return;
     HapticFeedback.lightImpact();
 
-    final authProvider = context.read<AuthProvider>();
     final success = await authProvider.signInWithEmail(
       _emailController.text.trim(),
       _passwordController.text.trim(),
@@ -41,9 +41,9 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _googleLogin() async {
-    if (context.read<AuthProvider>().status == AuthStatus.Authenticating) return;
-    HapticFeedback.lightImpact();
     final authProvider = context.read<AuthProvider>();
+    if (authProvider.status == AuthStatus.Authenticating) return;
+    HapticFeedback.lightImpact();
     final result = await authProvider.signInWithGoogle();
 
     if (result['success'] == true && mounted) {
