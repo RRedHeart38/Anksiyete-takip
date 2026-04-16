@@ -187,6 +187,7 @@ class ChatProvider with ChangeNotifier {
     final user = _auth.currentUser;
     if (user == null) return;
     try {
+      final createdAt = DateTime.now().toIso8601String();
       final docRef = await _firestore
           .collection('users')
           .doc(user.uid)
@@ -194,7 +195,7 @@ class ChatProvider with ChangeNotifier {
           .add({
             'user_data': userData,
             'ai_response': aiResponse,
-            'tarih': DateTime.now().toIso8601String(),
+            'tarih': createdAt,
             'isHelpful': null,
             'source': source,
           });
@@ -207,7 +208,7 @@ class ChatProvider with ChangeNotifier {
         'id': docRef.id,
         'user_data': userData,
         'ai_response': aiResponse,
-        'tarih': DateTime.now().toIso8601String(),
+        'tarih': createdAt,
         'isHelpful': null,
         'source': source,
       });
