@@ -108,15 +108,37 @@ class ChatProvider with ChangeNotifier {
       initializeGemini();
       if (_chatSession == null) return;
     }
-    _chatMessages.insert(0, {'user_data': {'notlar': userMessage}, 'ai_response': null, 'tarih': DateTime.now().toIso8601String(), 'source': 'chat', 'id': 'temp_${DateTime.now().millisecondsSinceEpoch}'});
-    notifyListeners();
+    final tempMessageId = 'temp_${DateTime.now().millisecondsSinceEpoch}';
     try {
-      final response = await _chatSession!.sendMessage(Content.text(userMessage));
-      if (response.text != null) {
-        await _saveAIAnalysis({'notlar': userMessage}, response.text!, 'chat');
+      _isAnalyzing = true;
+      _chatMessages.insert(0, {
+        'user_data': {'notlar': userMessage},
+        'ai_response': null,
+        'tarih': DateTime.now().toIso8601String(),
+        'source': 'chat',
+        'id': tempMessageId,
+      });
+      notifyListeners();
+
+      try {
+        final response = await _chatSession!.sendMessage(Content.text(userMessage));
+        if (response.text != null) {
+          await _saveAIAnalysis(
+            {'notlar': userMessage},
+            response.text!,
+            'chat',
+            tempMessageId: tempMessageId,
+          );
+        } else {
+          _replaceTempMessageWithError(tempMessageId);
+        }
+      } catch (e) {
+        print('Sohbet mesajı gönderilirken hata oluştu: $e');
+        _replaceTempMessageWithError(tempMessageId);
       }
-    } catch (e) {
-      print('Sohbet mesajı gönderilirken hata oluştu: $e');
+    } finally {
+      _isAnalyzing = false;
+      notifyListeners();
     }
   }
 
@@ -156,14 +178,66 @@ class ChatProvider with ChangeNotifier {
     await sendChatMessage(prompt);
   }
 
-  Future<void> _saveAIAnalysis(Map<String, dynamic> userData, String aiResponse, String source) async {
+  Future<void> _saveAIAnalysis(
+    Map<String, dynamic> userData,
+    String aiResponse,
+    String source, {
+    String? tempMessageId,
+  }) async {
     final user = _auth.currentUser;
     if (user == null) return;
     try {
-      await _firestore.collection('users').doc(user.uid).collection('ai_analyses').add({'user_data': userData, 'ai_response': aiResponse, 'tarih': DateTime.now().toIso8601String(), 'isHelpful': null, 'source': source});
-      await fetchChatMessages();
+      final createdAt = DateTime.now().toIso8601String();
+      final docRef = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('ai_analyses')
+          .add({
+            'user_data': userData,
+            'ai_response': aiResponse,
+            'tarih': createdAt,
+            'isHelpful': null,
+            'source': source,
+          });
+
+      if (tempMessageId != null) {
+        _removeMessageById(tempMessageId);
+      }
+
+      _chatMessages.insert(0, {
+        'id': docRef.id,
+        'user_data': userData,
+        'ai_response': aiResponse,
+        'tarih': createdAt,
+        'isHelpful': null,
+        'source': source,
+      });
+      notifyListeners();
     } catch (e) {
       print('Yapay zeka analizi kaydedilirken hata oluştu: $e');
+      if (tempMessageId != null) {
+        _replaceTempMessageWithError(tempMessageId);
+      }
+    }
+  }
+
+  void _replaceTempMessageWithError(String tempMessageId) {
+    _removeMessageById(tempMessageId);
+    _chatMessages.insert(0, {
+      'id': 'error_${DateTime.now().millisecondsSinceEpoch}',
+      'user_data': null,
+      'ai_response': 'Şu anda yanıt oluşturulamadı. Lütfen tekrar deneyin.',
+      'tarih': DateTime.now().toIso8601String(),
+      'source': 'chat',
+      'isHelpful': null,
+    });
+    notifyListeners();
+  }
+
+  void _removeMessageById(String messageId) {
+    final index = _chatMessages.indexWhere((msg) => msg['id'] == messageId);
+    if (index != -1) {
+      _chatMessages.removeAt(index);
     }
   }
 
