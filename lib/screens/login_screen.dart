@@ -24,6 +24,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
+    if (context.read<AuthProvider>().status == AuthStatus.Authenticating) return;
     HapticFeedback.lightImpact();
 
     final authProvider = context.read<AuthProvider>();
@@ -40,6 +41,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _googleLogin() async {
+    if (context.read<AuthProvider>().status == AuthStatus.Authenticating) return;
     HapticFeedback.lightImpact();
     final authProvider = context.read<AuthProvider>();
     final result = await authProvider.signInWithGoogle();
@@ -68,6 +70,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
     final theme = Theme.of(context);
+    final isAuthenticating = authProvider.status == AuthStatus.Authenticating;
 
     return Scaffold(
       body: SafeArea(
@@ -101,6 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   TextFormField(
                     controller: _emailController,
+                    enabled: !isAuthenticating,
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(labelText: 'E-posta', border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), prefixIcon: const Icon(Icons.email_outlined)),
                     validator: (v) => (v == null || v.isEmpty || !v.contains('@')) ? 'Geçerli bir e-posta girin' : null,
@@ -110,6 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   TextFormField(
                     controller: _passwordController,
+                    enabled: !isAuthenticating,
                     obscureText: true,
                     decoration: InputDecoration(labelText: 'Şifre', border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), prefixIcon: const Icon(Icons.lock_outline)),
                     validator: (v) => (v == null || v.length < 6) ? 'Şifre en az 6 karakter olmalı' : null,
@@ -117,7 +122,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 24),
 
-                  authProvider.status == AuthStatus.Authenticating
+                  isAuthenticating
                       ? const Center(child: CircularProgressIndicator())
                       : ElevatedButton(
                     onPressed: _login,
@@ -128,7 +133,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 12),
 
                   ElevatedButton.icon(
-                    onPressed: _googleLogin,
+                    onPressed: isAuthenticating ? null : _googleLogin,
                     icon: const FaIcon(FontAwesomeIcons.google, size: 20),
                     label: const Text('Google ile Giriş Yap'),
                     style: ElevatedButton.styleFrom(

@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 import '../providers/chat_provider.dart';
 import 'breathing_exercise_screen.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 
 class AiChatScreen extends StatefulWidget {
   const AiChatScreen({super.key});
@@ -18,6 +17,7 @@ class AiChatScreen extends StatefulWidget {
 class _AiChatScreenState extends State<AiChatScreen> {
   final TextEditingController _chatController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  int _lastMessageCount = 0;
 
   @override
   void dispose() {
@@ -37,7 +37,17 @@ class _AiChatScreenState extends State<AiChatScreen> {
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
-        _scrollController.animateTo(0.0, duration: const Duration(milliseconds: 400), curve: Curves.easeOutQuad);
+        final currentOffset = _scrollController.offset;
+        const targetOffset = 0.0;
+        if ((currentOffset - targetOffset).abs() > 300) {
+          _scrollController.jumpTo(targetOffset);
+        } else {
+          _scrollController.animateTo(
+            targetOffset,
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOutQuad,
+          );
+        }
       }
     });
   }
@@ -46,9 +56,10 @@ class _AiChatScreenState extends State<AiChatScreen> {
   Widget build(BuildContext context) {
     return Consumer<ChatProvider>(
       builder: (context, chatProvider, child) {
-        if (chatProvider.chatMessages.isNotEmpty) {
+        if (chatProvider.chatMessages.length > _lastMessageCount) {
           _scrollToBottom();
         }
+        _lastMessageCount = chatProvider.chatMessages.length;
 
         return Column(
           children: [
@@ -64,10 +75,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                 itemCount: chatProvider.chatMessages.length,
                 itemBuilder: (context, index) {
                   final message = chatProvider.chatMessages[index];
-                  return _buildMessageBubble(context, message)
-                      .animate()
-                      .fade(duration: 300.ms)
-                      .slideY(begin: 0.1, end: 0, curve: Curves.easeOut);
+                  return _buildMessageBubble(context, message);
                 },
               ),
             ),

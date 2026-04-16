@@ -108,15 +108,34 @@ class ChatProvider with ChangeNotifier {
       initializeGemini();
       if (_chatSession == null) return;
     }
-    _chatMessages.insert(0, {'user_data': {'notlar': userMessage}, 'ai_response': null, 'tarih': DateTime.now().toIso8601String(), 'source': 'chat', 'id': 'temp_${DateTime.now().millisecondsSinceEpoch}'});
+    _isAnalyzing = true;
+    final tempMessageId = 'temp_${DateTime.now().millisecondsSinceEpoch}';
+    _chatMessages.insert(0, {
+      'user_data': {'notlar': userMessage},
+      'ai_response': null,
+      'tarih': DateTime.now().toIso8601String(),
+      'source': 'chat',
+      'id': tempMessageId,
+    });
     notifyListeners();
     try {
       final response = await _chatSession!.sendMessage(Content.text(userMessage));
       if (response.text != null) {
-        await _saveAIAnalysis({'notlar': userMessage}, response.text!, 'chat');
+        await _saveAIAnalysis(
+          {'notlar': userMessage},
+          response.text!,
+          'chat',
+          tempMessageId: tempMessageId,
+        );
+      } else {
+        _replaceTempMessageWithError(tempMessageId);
       }
     } catch (e) {
       print('Sohbet mesajı gönderilirken hata oluştu: $e');
+      _replaceTempMessageWithError(tempMessageId);
+    } finally {
+      _isAnalyzing = false;
+      notifyListeners();
     }
   }
 
@@ -156,15 +175,60 @@ class ChatProvider with ChangeNotifier {
     await sendChatMessage(prompt);
   }
 
-  Future<void> _saveAIAnalysis(Map<String, dynamic> userData, String aiResponse, String source) async {
+  Future<void> _saveAIAnalysis(
+    Map<String, dynamic> userData,
+    String aiResponse,
+    String source, {
+    String? tempMessageId,
+  }) async {
     final user = _auth.currentUser;
     if (user == null) return;
     try {
-      await _firestore.collection('users').doc(user.uid).collection('ai_analyses').add({'user_data': userData, 'ai_response': aiResponse, 'tarih': DateTime.now().toIso8601String(), 'isHelpful': null, 'source': source});
-      await fetchChatMessages();
+      final docRef = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('ai_analyses')
+          .add({
+            'user_data': userData,
+            'ai_response': aiResponse,
+            'tarih': DateTime.now().toIso8601String(),
+            'isHelpful': null,
+            'source': source,
+          });
+
+      if (tempMessageId != null) {
+        _chatMessages.removeWhere((msg) => msg['id'] == tempMessageId);
+      }
+
+      _chatMessages.insert(0, {
+        'id': docRef.id,
+        'user_data': userData,
+        'ai_response': aiResponse,
+        'tarih': DateTime.now().toIso8601String(),
+        'isHelpful': null,
+        'source': source,
+      });
+      notifyListeners();
     } catch (e) {
       print('Yapay zeka analizi kaydedilirken hata oluştu: $e');
+      if (tempMessageId != null) {
+        _replaceTempMessageWithError(tempMessageId);
+      }
     }
+  }
+
+  void _replaceTempMessageWithError(String tempMessageId) {
+    _chatMessages.removeWhere((msg) => msg['id'] == tempMessageId);
+    _chatMessages.insert(0, {
+      'id': 'error_${DateTime.now().millisecondsSinceEpoch}',
+      'user_data': null,
+      'ai_response':
+          'Şu anda yanıt oluşturulamadı. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.',
+      'tarih': DateTime.now().toIso8601String(),
+      'source': 'chat',
+      'isHelpful': null,
+    });
+    notifyListeners();
   }
 
   Future<void> saveFeedback(String docId, bool isHelpful) async {
