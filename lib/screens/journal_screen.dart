@@ -35,7 +35,8 @@ class JournalScreen extends StatelessWidget {
                       children: [
                         _buildJournalList(context, journalProvider.entries),
                         Positioned(
-                          bottom: 24,
+                          // raise FAB above other persistent bottom UI (e.g. "Günlük" button)
+                          bottom: MediaQuery.of(context).padding.bottom + 80,
                           right: 24,
                           child: FloatingActionButton.extended(
                             onPressed: () {
@@ -120,7 +121,7 @@ class JournalScreen extends StatelessWidget {
 
     // Header dahil edilerek liste oluşturuluyor
     return ListView.builder(
-      padding: const EdgeInsets.only(bottom: 100), // FAB için boşluk
+      padding: const EdgeInsets.only(bottom: 180), // FAB için daha geniş boşluk
       itemCount: journalEntries.length + 1, // +1 Header için
       itemBuilder: (context, index) {
         if (index == 0) {

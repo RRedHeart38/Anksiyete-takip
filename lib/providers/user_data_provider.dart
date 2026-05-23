@@ -197,4 +197,27 @@ class UserDataProvider with ChangeNotifier {
       return false;
     }
   }
+
+  // Save onboarding responses into Firestore under users/{uid}/onboarding/initial
+  Future<bool> saveOnboardingResponses(Map<String, dynamic> answers, {bool completed = false}) async {
+    final user = _auth.currentUser;
+    if (user == null) return false;
+
+    try {
+      final docRef = _firestore.collection('users').doc(user.uid).collection('onboarding').doc('initial');
+      final payload = {
+        'answers': answers,
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
+      if (completed) payload['completedAt'] = FieldValue.serverTimestamp();
+
+      await docRef.set(payload, SetOptions(merge: true));
+      // Refresh local data after saving
+      await fetchUserData();
+      return true;
+    } catch (e) {
+      print('Onboarding verisi kaydedilemedi: $e');
+      return false;
+    }
+  }
 }

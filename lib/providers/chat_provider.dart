@@ -515,8 +515,12 @@ class ChatProvider with ChangeNotifier {
 
   String _getAchievementContext() {
     if (_achievementProvider == null) return '';
-    
-    final streak = _achievementProvider!.achievements.firstWhere((a) => a.type.toString().contains('streak'), orElse: () => _achievementProvider!.achievements.first).title; // Basit bir örnek
+
+    final achievements = _achievementProvider!.achievements;
+    if (achievements.isEmpty) return '';
+
+    final streakAchievement = achievements.where((a) => a.type.toString().contains('streak')).cast<dynamic>().toList();
+    final streak = streakAchievement.isNotEmpty ? streakAchievement.first.title : achievements.first.title;
     final totalStats = _userDataProvider != null ? "Seri: ${_userDataProvider!.streakCount} gün." : "";
     
     // Son kazanılan başarım

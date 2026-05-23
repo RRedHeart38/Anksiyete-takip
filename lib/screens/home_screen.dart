@@ -25,6 +25,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  late final PageController _pageController;
+  int _lastSyncedIndex = 0;
 
   static const List<Widget> _widgetOptions = <Widget>[
     AnxietyTrackerScreen(),
@@ -36,12 +38,19 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _pageController = PageController(initialPage: 0);
     // Widget oluşturulduğunda profil kontrolü yap
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkProfileCompletion();
       _setupAchievementListener();
       _refreshNotifications();
     });
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   void _refreshNotifications() {
@@ -86,8 +95,16 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     // Provider'ları izleyerek (watch) ilgili verileri alıyoruz
     final userDataProvider = context.watch<UserDataProvider>();
-    final userName = userDataProvider.userName;
     final navProvider = context.watch<NavigationProvider>();
+
+    if (_lastSyncedIndex != navProvider.selectedIndex && _pageController.hasClients) {
+      _lastSyncedIndex = navProvider.selectedIndex;
+      _pageController.animateToPage(
+        navProvider.selectedIndex,
+        duration: const Duration(milliseconds: 380),
+        curve: Curves.easeInOutCubicEmphasized,
+      );
+    }
 
     // Profil bilgileri eksikse loading göster (yönlendirme yapılacak)
     if (!userDataProvider.isProfileComplete && !userDataProvider.isLoading) {
@@ -97,26 +114,59 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     return Scaffold(
-      extendBodyBehindAppBar: true, // Status bar'ın arkasına geçmesi için
-      body: IndexedStack(
-        // Index'i artık NavigationProvider'dan alıyoruz
-        index: navProvider.selectedIndex,
+      extendBody: true,
+      body: PageView(
+        controller: _pageController,
+        physics: const BouncingScrollPhysics(),
+        onPageChanged: (index) {
+          _lastSyncedIndex = index;
+          if (navProvider.selectedIndex != index) {
+            context.read<NavigationProvider>().changeTab(index);
+          }
+        },
         children: _widgetOptions,
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(FlutterRemix.pulse_line), label: 'Takip'),
-          BottomNavigationBarItem(icon: Icon(FlutterRemix.lightbulb_line), label: 'Öneriler'),
-          BottomNavigationBarItem(icon: Icon(FlutterRemix.chat_2_line), label: 'Sohbet'),
-          BottomNavigationBarItem(icon: Icon(FlutterRemix.book_open_line), label: 'Günlük'),
-        ],
-        // Mevcut index'i NavigationProvider'dan alıyoruz
-        currentIndex: navProvider.selectedIndex,
-        // Tıklandığında NavigationProvider'daki fonksiyonu çağırıyoruz (dinlemeden)
-        onTap: (index) {
-          context.read<NavigationProvider>().changeTab(index);
-        },
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.96),
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(color: Colors.white.withOpacity(0.05)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.22),
+                blurRadius: 24,
+                offset: const Offset(0, 12),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(28),
+            child: NavigationBar(
+              backgroundColor: Colors.transparent,
+              selectedIndex: navProvider.selectedIndex,
+              onDestinationSelected: (index) {
+                _lastSyncedIndex = index;
+                context.read<NavigationProvider>().changeTab(index);
+                if (_pageController.hasClients) {
+                  _pageController.animateToPage(
+                    index,
+                    duration: const Duration(milliseconds: 380),
+                    curve: Curves.easeInOutCubicEmphasized,
+                  );
+                }
+              },
+              labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+              destinations: const <NavigationDestination>[
+                NavigationDestination(icon: Icon(FlutterRemix.pulse_line), selectedIcon: Icon(FlutterRemix.pulse_fill), label: 'Takip'),
+                NavigationDestination(icon: Icon(FlutterRemix.lightbulb_line), selectedIcon: Icon(FlutterRemix.lightbulb_fill), label: 'Öneriler'),
+                NavigationDestination(icon: Icon(FlutterRemix.chat_2_line), selectedIcon: Icon(FlutterRemix.chat_2_fill), label: 'Sohbet'),
+                NavigationDestination(icon: Icon(FlutterRemix.book_open_line), selectedIcon: Icon(FlutterRemix.book_open_fill), label: 'Günlük'),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

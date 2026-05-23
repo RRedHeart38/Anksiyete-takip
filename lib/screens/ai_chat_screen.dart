@@ -212,8 +212,10 @@ class _AiChatScreenState extends State<AiChatScreen> {
   }
   
   Widget _buildMessageInput() {
+    final bottomInset = MediaQuery.of(context).padding.bottom;
+    final keyboardInset = MediaQuery.of(context).viewInsets.bottom;
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 32), // Bottom padding for spacing above nav bar
+      padding: EdgeInsets.fromLTRB(16, 12, 16, bottomInset + keyboardInset + 45),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, -5))],
@@ -261,112 +263,131 @@ class _AiChatScreenState extends State<AiChatScreen> {
 
   Widget _buildMessageBubble(BuildContext context, Map<String, dynamic> message) {
     final userData = message['user_data'];
-    final aiResponse = message['ai_response'];
+    final aiResponse = message['ai_response'] as String?;
+    final source = (message['source'] ?? '').toString();
+
+    final userText = (userData is Map && userData['notlar'] != null)
+        ? userData['notlar'].toString().trim()
+        : '';
+
+    final showUserBubble = source == 'chat' && userText.isNotEmpty;
+    final showAiBubble = aiResponse != null && aiResponse.trim().isNotEmpty;
+
+    if (!showUserBubble && !showAiBubble) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (showUserBubble) _buildUserBubble(context, userText),
+        if (showAiBubble) _buildAiBubble(context, aiResponse!),
+      ],
+    );
+  }
+
+  Widget _buildUserBubble(BuildContext context, String messageText) {
     final primaryColor = Theme.of(context).primaryColor;
 
-    final bool isUserMessage = (aiResponse == null && userData != null);
-
-    if (isUserMessage) {
-      return Align(
-        alignment: Alignment.centerRight,
-        child: Container(
-          margin: const EdgeInsets.symmetric(vertical: 6.0),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: primaryColor,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(4),
-              bottomLeft: Radius.circular(20),
-              bottomRight: Radius.circular(20),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: primaryColor.withOpacity(0.3),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              )
-            ],
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 6.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: primaryColor,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(4),
+            bottomLeft: Radius.circular(20),
+            bottomRight: Radius.circular(20),
           ),
-          child: Text(
-            userData['notlar'] ?? '',
-            style: const TextStyle(color: Colors.white, fontSize: 15),
-          ),
+          boxShadow: [
+            BoxShadow(
+              color: primaryColor.withOpacity(0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            )
+          ],
         ),
-      );
-    } else {
-      final exerciseMatch = RegExp(r'\[EGZERSİZ: (.+?)\]').firstMatch(aiResponse ?? '');
-      final exerciseName = exerciseMatch?.group(1);
+        child: Text(
+          messageText,
+          style: const TextStyle(color: Colors.white, fontSize: 15),
+        ),
+      ),
+    );
+  }
 
-      final meditationMatch = RegExp(r'\[MEDİTASYON: (.+?)\]').firstMatch(aiResponse ?? '');
-      final meditationName = meditationMatch?.group(1);
-      
-      String messageDisplay = aiResponse ?? '';
-      messageDisplay = messageDisplay.replaceAll(RegExp(r'\[EGZERSİZ: .+?\]'), '');
-      messageDisplay = messageDisplay.replaceAll(RegExp(r'\[MEDİTASYON: .+?\]'), '');
-      messageDisplay = messageDisplay.trim();
+  Widget _buildAiBubble(BuildContext context, String aiResponse) {
+    final exerciseMatch = RegExp(r'\[EGZERSİZ: (.+?)\]').firstMatch(aiResponse);
+    final exerciseName = exerciseMatch?.group(1);
 
-      final isDark = Theme.of(context).brightness == Brightness.dark;
+    final meditationMatch = RegExp(r'\[MEDİTASYON: (.+?)\]').firstMatch(aiResponse);
+    final meditationName = meditationMatch?.group(1);
 
-      return Align(
-        alignment: Alignment.centerLeft,
-        child: Container(
-          margin: const EdgeInsets.symmetric(vertical: 6.0),
-          padding: const EdgeInsets.all(16.0),
-          decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF2C2C2C) : Colors.white,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(4),
-              topRight: Radius.circular(20),
-              bottomLeft: Radius.circular(20),
-              bottomRight: Radius.circular(20),
-            ),
-             boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 5,
-                offset: const Offset(0, 2),
-              )
-            ],
+    String messageDisplay = aiResponse;
+    messageDisplay = messageDisplay.replaceAll(RegExp(r'\[EGZERSİZ: .+?\]'), '');
+    messageDisplay = messageDisplay.replaceAll(RegExp(r'\[MEDİTASYON: .+?\]'), '');
+    messageDisplay = messageDisplay.trim();
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 6.0),
+        padding: const EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF2C2C2C) : Colors.white,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(4),
+            topRight: Radius.circular(20),
+            bottomLeft: Radius.circular(20),
+            bottomRight: Radius.circular(20),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SelectableText(
-                messageDisplay,
-                style: TextStyle(
-                  color: isDark ? Colors.white : Colors.black87,
-                  fontSize: 15,
-                  height: 1.4,
-                ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 5,
+              offset: const Offset(0, 2),
+            )
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SelectableText(
+              messageDisplay,
+              style: TextStyle(
+                color: isDark ? Colors.white : Colors.black87,
+                fontSize: 15,
+                height: 1.4,
               ),
-              
-              if (exerciseName != null) ...[
-                const SizedBox(height: 12),
-                _buildActionButton(context, '"$exerciseName" Egzersizi', FlutterRemix.lungs_line, () {
-                   Navigator.of(context).push(MaterialPageRoute(builder: (context) => BreathingExerciseScreen(exerciseType: exerciseName)));
-                }),
-              ],
-
-              if (meditationName != null) ...[
-                const SizedBox(height: 12),
-                 _buildActionButton(context, '"$meditationName" Başlat', FlutterRemix.mental_health_line, () {
-                    try {
-                      final meditation = Meditation.getMeditations().firstWhere(
-                        (m) => m.title == meditationName,
-                        orElse: () =>  Meditation.getMeditations().first, // Fallback
-                      );
-                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => MeditationPlayerScreen(meditation: meditation)));
-                    } catch (e) {
-                      print("Meditasyon bulunamadı: $e");
-                    }
-                }),
-              ]
+            ),
+            if (exerciseName != null) ...[
+              const SizedBox(height: 12),
+              _buildActionButton(context, '"$exerciseName" Egzersizi', FlutterRemix.lungs_line, () {
+                Navigator.of(context).push(MaterialPageRoute(builder: (context) => BreathingExerciseScreen(exerciseType: exerciseName)));
+              }),
             ],
-          ),
+            if (meditationName != null) ...[
+              const SizedBox(height: 12),
+              _buildActionButton(context, '"$meditationName" Başlat', FlutterRemix.mental_health_line, () {
+                try {
+                  final meditation = Meditation.getMeditations().firstWhere(
+                    (m) => m.title == meditationName,
+                    orElse: () => Meditation.getMeditations().first,
+                  );
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => MeditationPlayerScreen(meditation: meditation)));
+                } catch (e) {
+                  print("Meditasyon bulunamadı: $e");
+                }
+              }),
+            ]
+          ],
         ),
-      );
-    }
+      ),
+    );
   }
 
   Widget _buildActionButton(BuildContext context, String label, IconData icon, VoidCallback onPressed) {

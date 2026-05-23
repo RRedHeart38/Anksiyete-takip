@@ -185,6 +185,32 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  // Anonymous sign-in to support onboarding before user registers
+  Future<bool> signInAnonymously() async {
+    try {
+      if (_auth.currentUser != null) {
+        _status = AuthStatus.Authenticated;
+        notifyListeners();
+        return true;
+      }
+      final userCredential = await _auth.signInAnonymously();
+      final user = userCredential.user;
+      _status = user != null ? AuthStatus.Authenticated : AuthStatus.Unauthenticated;
+      notifyListeners();
+      return user != null;
+    } on FirebaseAuthException catch (e) {
+      _errorMessage = e.message ?? 'Anonim oturum açılamadı';
+      _status = AuthStatus.Unauthenticated;
+      notifyListeners();
+      return false;
+    } catch (e) {
+      _errorMessage = 'Anonim oturumda beklenmeyen hata';
+      _status = AuthStatus.Unauthenticated;
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<void> signOut() async {
     await _auth.signOut();
     await _googleSignIn.signOut();
